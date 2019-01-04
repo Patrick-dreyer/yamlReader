@@ -1,0 +1,33 @@
+# This policy allows ingress traffic from the same project to every pod with "role: proxy", and also allows egress traffic for the same pod - on both HTTP and HTTPS
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ftp-engress.yml
+  namespace: http-proxy-project
+spec:
+  podSelector:
+    matchLabels:
+      role: proxy
+  ingress:
+  - from:
+    - namespaceSelector:
+      matchLabels:
+        project: http-proxy-project
+    ports:
+      - protocol: TCP
+        port: 80
+      - protocol: TCP
+        port: 443
+  egress:
+  - to:
+    - ipBlock:
+      cidr: 0.0.0.0/0 # Allow the whole internet
+      except:
+        - 32.165.28.0/24 # This subnet hosts NSFW content
+    ports:
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 443
+  
